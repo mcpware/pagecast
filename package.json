@@ -1,6 +1,6 @@
 {
   "name": "@mcpware/pagecast",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Record any browser page as GIF or video via MCP — powered by Playwright + ffmpeg",
   "type": "module",
   "bin": {
