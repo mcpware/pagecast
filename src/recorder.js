@@ -91,6 +91,21 @@ export async function interactWithPage(sessionId, actions) {
           results.push(`Hovered ${action.selector}`);
         }
         break;
+      case 'type':
+        if (action.selector) {
+          await page.click(action.selector, { timeout: 5000 });
+        }
+        await page.keyboard.type(action.text || '', { delay: action.delay || 80 });
+        results.push(`Typed "${action.text}" ${action.selector ? 'in ' + action.selector : ''}`);
+        break;
+      case 'press':
+        await page.keyboard.press(action.key || 'Enter');
+        results.push(`Pressed ${action.key || 'Enter'}`);
+        break;
+      case 'select':
+        await page.selectOption(action.selector, action.value, { timeout: 5000 });
+        results.push(`Selected "${action.value}" in ${action.selector}`);
+        break;
       case 'navigate':
         await page.goto(action.url, { waitUntil: 'load', timeout: 30_000 });
         results.push(`Navigated to ${action.url}`);
