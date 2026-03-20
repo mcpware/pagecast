@@ -12,8 +12,10 @@
     "postinstall": "npx playwright install chromium 2>/dev/null || true"
   },
   "keywords": [
-    "mcp", "pagecast", "screen-recorder", "playwright", "gif", "video",
-    "recording", "demo", "screencast", "webm", "browser", "automation"
+    "mcp", "mcp-server", "pagecast", "screen-recorder", "screen-recording",
+    "playwright", "gif", "gif-recorder", "video", "recording", "demo",
+    "screencast", "webm", "browser", "automation", "documentation",
+    "claude", "model-context-protocol"
   ],
   "mcpName": "io.github.mcpware/pagecast",
   "author": "mcpware",
