@@ -11,6 +11,10 @@ AI assistants can record browser sessions, perform interactions (scroll, click, 
 
 ![Demo](docs/demo.gif)
 
+### AI Agent Posts on Moltbook — While Recording Itself
+
+![Moltbook Demo](docs/moltbook-demo.gif)
+
 ## The Problem
 
 Creating demo GIFs and recording browser sessions is manual and tedious:
