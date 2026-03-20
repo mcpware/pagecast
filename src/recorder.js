@@ -83,8 +83,13 @@ export async function interactWithPage(sessionId, actions) {
         results.push(`Clicked ${action.selector}`);
         break;
       case 'hover':
-        await page.hover(action.selector, { timeout: 5000 });
-        results.push(`Hovered ${action.selector}`);
+        if (action.x !== undefined && action.y !== undefined) {
+          await page.mouse.move(action.x, action.y, { steps: 10 });
+          results.push(`Hovered at (${action.x}, ${action.y})`);
+        } else {
+          await page.hover(action.selector, { timeout: 5000 });
+          results.push(`Hovered ${action.selector}`);
+        }
         break;
       case 'navigate':
         await page.goto(action.url, { waitUntil: 'load', timeout: 30_000 });
