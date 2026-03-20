@@ -9,8 +9,6 @@
 
 AI assistants can record browser sessions, perform interactions (scroll, click, hover), and export optimized GIFs or video — perfect for demo content, documentation, and recording automated workflows.
 
-![Demo](docs/demo.gif)
-
 ### AI Agent Posts on Moltbook — While Recording Itself
 
 ![Moltbook Demo](docs/moltbook-demo.gif)
