@@ -1,0 +1,33 @@
+{
+  "name": "@mcpware/pagecast",
+  "version": "0.1.0",
+  "description": "Record any browser page as GIF or video via MCP — powered by Playwright + ffmpeg",
+  "type": "module",
+  "bin": {
+    "pagecast": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "postinstall": "npx playwright install chromium 2>/dev/null || true"
+  },
+  "keywords": [
+    "mcp", "pagecast", "screen-recorder", "playwright", "gif", "video",
+    "recording", "demo", "screencast", "webm", "browser", "automation"
+  ],
+  "mcpName": "io.github.mcpware/pagecast",
+  "author": "mcpware",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mcpware/pagecast"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "playwright": "^1.52.0",
+    "zod": "^3.23.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+recordings/
+.env
+.DS_Store
+*.log
+.playwright-mcp/
+.mcpregistry_github_token
+.mcpregistry_registry_token
