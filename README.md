@@ -5,6 +5,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/mcpware/pagecast?style=social)](https://github.com/mcpware/pagecast)
 [![GitHub forks](https://img.shields.io/github/forks/mcpware/pagecast?style=social)](https://github.com/mcpware/pagecast/fork)
 
+**English** | [廣東話](README.zh-HK.md)
+
 **Tell your AI to record what it does. It opens a browser, does the thing, and hands you back a GIF or video.**
 
 An MCP server that gives AI assistants the ability to record any browser page — as GIF, WebM, or MP4. The AI controls the browser, interacts with the page, and the whole session is captured on video. You watch it happen live.
@@ -12,17 +14,6 @@ An MCP server that gives AI assistants the ability to record any browser page �
 ### The demo below was recorded by Pagecast itself. Yes, really.
 
 ![Moltbook Demo](docs/moltbook-demo.gif)
-
-### 📐 Any size. Any platform. AI operates the browser, you get the recording.
-
-Record in **any viewport size** — standard 16:9, vertical 9:16 for IG Reels / TikTok, square 1:1, or any custom dimension. The AI opens a real browser at whatever size you need, performs real interactions, and records the whole thing.
-
-| Format | Size | For |
-|--------|------|-----|
-| 1280×720 | 16:9 | GitHub README, YouTube, docs |
-| 1080×1920 | 9:16 | **IG Reels, TikTok, YouTube Shorts** |
-| 1080×1080 | 1:1 | Instagram posts, LinkedIn |
-| Custom | Any | Whatever you need |
 
 ## Why
 
@@ -51,6 +42,17 @@ The browser is **visible by default** — you watch the AI work in real time.
 | "Walk through the signup flow and record a video" | AI creates onboarding documentation | `.mp4` |
 | "Post on Moltbook and record yourself doing it" | AI records its own marketing material 🤯 | `.gif` |
 | "Record my app in 1080x1920 for an IG Reel" | AI records in vertical format for social media | `.mp4` |
+
+### 📐 Any size. Any platform.
+
+Record in **any viewport size** — the AI opens a real browser at whatever dimension you need:
+
+| Format | Size | For |
+|--------|------|-----|
+| 1280×720 | 16:9 | GitHub README, YouTube, docs |
+| 1080×1920 | 9:16 | **IG Reels, TikTok, YouTube Shorts** |
+| 1080×1080 | 1:1 | Instagram posts, LinkedIn |
+| Custom | Any | Whatever you need |
 
 ## Quick Start
 
