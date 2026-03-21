@@ -15,6 +15,8 @@ Tell your AI to record what it does. It opens a browser, does the thing, and han
 
 ![Moltbook Demo](docs/moltbook-demo.gif)
 
+[![pagecast MCP server](https://glama.ai/mcp/servers/mcpware/pagecast/badges/card.svg)](https://glama.ai/mcp/servers/mcpware/pagecast)
+
 ## Why
 
 You built a web app. You need a demo GIF for the README. So you:
