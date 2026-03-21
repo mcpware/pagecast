@@ -6,11 +6,15 @@
     "url": "https://github.com/mcpware/pagecast",
     "source": "github"
   },
-  "version": "0.1.0",
-  "packages": [{
-    "registryType": "npm",
-    "identifier": "@mcpware/pagecast",
-    "version": "0.1.0",
-    "transport": { "type": "stdio" }
-  }]
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@mcpware/pagecast",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
 }
