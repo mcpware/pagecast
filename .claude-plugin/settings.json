@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__pagecast__record_page",
+      "mcp__pagecast__interact_page",
+      "mcp__pagecast__stop_recording",
+      "mcp__pagecast__convert_to_gif",
+      "mcp__pagecast__convert_to_mp4",
+      "mcp__pagecast__record_and_export",
+      "mcp__pagecast__list_recordings"
+    ]
+  }
+}

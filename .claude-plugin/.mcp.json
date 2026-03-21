@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "pagecast": {
+      "command": "npx",
+      "args": ["-y", "@mcpware/pagecast"]
+    }
+  }
+}
