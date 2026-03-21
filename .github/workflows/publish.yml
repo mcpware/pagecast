@@ -1,4 +1,4 @@
-name: Publish to npm
+name: Publish
 on:
   push:
     tags:
@@ -6,6 +6,9 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -21,14 +24,24 @@ jobs:
           PUBLISHED=$(npm view "$PKG_NAME@$PKG_VER" version 2>/dev/null || echo "")
           if [ "$PUBLISHED" = "$PKG_VER" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
-            echo "Version $PKG_VER already published, skipping."
           else
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - run: npm publish --access public
+      - name: Publish to npm
         if: steps.check.outputs.skip != 'true'
-        continue-on-error: true
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+      - name: Authenticate to MCP Registry (OIDC)
+        run: ./mcp-publisher login github-oidc
+      - name: Publish to MCP Registry
+        run: ./mcp-publisher publish
