@@ -15,22 +15,57 @@ const mcp = new McpServer({
   version: '0.2.0'
 });
 
+// Platform presets: user says "for Instagram Reels" and we pick the right size + format
+const PLATFORM_PRESETS = {
+  'github':    { width: 1280, height: 720,  format: 'gif',  label: 'GitHub README (16:9, GIF)' },
+  'readme':    { width: 1280, height: 720,  format: 'gif',  label: 'GitHub README (16:9, GIF)' },
+  'youtube':   { width: 1280, height: 720,  format: 'mp4',  label: 'YouTube (16:9, MP4)' },
+  'reels':     { width: 1080, height: 1920, format: 'mp4',  label: 'Instagram Reels (9:16, MP4)' },
+  'instagram': { width: 1080, height: 1080, format: 'mp4',  label: 'Instagram Post (1:1, MP4)' },
+  'tiktok':    { width: 1080, height: 1920, format: 'mp4',  label: 'TikTok (9:16, MP4)' },
+  'shorts':    { width: 1080, height: 1920, format: 'mp4',  label: 'YouTube Shorts (9:16, MP4)' },
+  'linkedin':  { width: 1080, height: 1080, format: 'mp4',  label: 'LinkedIn (1:1, MP4)' },
+  'twitter':   { width: 1280, height: 720,  format: 'mp4',  label: 'Twitter/X (16:9, MP4)' },
+};
+
+function resolvePlatform(platform, width, height) {
+  if (platform && PLATFORM_PRESETS[platform.toLowerCase()]) {
+    const preset = PLATFORM_PRESETS[platform.toLowerCase()];
+    return { width: width || preset.width, height: height || preset.height, format: preset.format, label: preset.label };
+  }
+  return { width: width || 1280, height: height || 720, format: null, label: null };
+}
+
 // Tool 1: Start recording a page
 mcp.tool(
   'record_page',
-  'Open a URL in a browser and start recording video. Returns a session ID. Call stop_recording when done. Common sizes: 1280x720 (16:9, README/YouTube), 1080x1920 (9:16, IG Reels/TikTok), 1080x1080 (1:1, Instagram/LinkedIn).',
+  `Open a URL in a browser and start recording video. Returns a session ID. Call stop_recording when done.
+
+Instead of specifying width/height, you can use the "platform" parameter:
+- "Record my app for GitHub README" → platform: "github" (1280×720, GIF)
+- "Record my app for Instagram Reels" → platform: "reels" (1080×1920, MP4)
+- "Record my app for TikTok" → platform: "tiktok" (1080×1920, MP4)
+- "Record my app for YouTube" → platform: "youtube" (1280×720, MP4)
+- "Record my app for YouTube Shorts" → platform: "shorts" (1080×1920, MP4)
+- "Record my app for Instagram post" → platform: "instagram" (1080×1080, MP4)
+- "Record my app for LinkedIn" → platform: "linkedin" (1080×1080, MP4)
+- "Record my app for Twitter" → platform: "twitter" (1280×720, MP4)
+
+Or pass custom width/height for any other size.`,
   {
     url: z.string().describe('URL to open and record'),
-    width: z.number().optional().default(1280).describe('Viewport width in pixels'),
-    height: z.number().optional().default(720).describe('Viewport height in pixels')
+    platform: z.string().optional().describe('Target platform: github, readme, youtube, reels, instagram, tiktok, shorts, linkedin, twitter'),
+    width: z.number().optional().describe('Viewport width in pixels (auto-set if platform is specified)'),
+    height: z.number().optional().describe('Viewport height in pixels (auto-set if platform is specified)')
   },
-  async ({ url, width, height }) => {
+  async ({ url, platform, width, height }) => {
     try {
-      const result = await startRecording(url, { width, height });
+      const resolved = resolvePlatform(platform, width, height);
+      const result = await startRecording(url, { width: resolved.width, height: resolved.height });
       return {
         content: [{
           type: 'text',
-          text: `Recording started!\n\nSession: ${result.sessionId}\nURL: ${result.url}\nStarted: ${result.startedAt}\n\nUse interact_page to scroll/click/hover during recording.\nCall stop_recording with sessionId "${result.sessionId}" when done.`
+          text: `Recording started!\n\nSession: ${result.sessionId}\nURL: ${result.url}\nViewport: ${resolved.width}×${resolved.height}${resolved.label ? ` (${resolved.label})` : ''}\nRecommended export: ${resolved.format || 'GIF or MP4'}\nStarted: ${result.startedAt}\n\nUse interact_page to scroll/click/hover during recording.\nCall stop_recording with sessionId "${result.sessionId}" when done.${resolved.format === 'gif' ? '\nThen use convert_to_gif for optimized GIF.' : resolved.format === 'mp4' ? '\nThen use convert_to_mp4 for social-ready MP4.' : '\nThen use convert_to_gif or convert_to_mp4.'}`
         }]
       };
     } catch (err) {
@@ -145,28 +180,51 @@ mcp.tool(
 
 // Tool 6: Record and convert in one step
 mcp.tool(
-  'record_and_gif',
-  'All-in-one: open URL, wait for specified duration, stop recording, convert to GIF. Best for simple demos.',
+  'record_and_export',
+  `All-in-one: open URL, wait for specified duration, stop recording, auto-export to the right format.
+
+Use the "platform" parameter and we handle everything:
+- "Record a demo for my GitHub README" → platform: "github" → 1280×720 GIF
+- "Record my app for Instagram Reels" → platform: "reels" → 1080×1920 MP4
+- "Make a TikTok demo" → platform: "tiktok" → 1080×1920 MP4
+- "Record for YouTube" → platform: "youtube" → 1280×720 MP4
+
+Or pass custom width/height/outputFormat for full control.`,
   {
     url: z.string().describe('URL to record'),
+    platform: z.string().optional().describe('Target platform: github, readme, youtube, reels, instagram, tiktok, shorts, linkedin, twitter — auto-sets size + format'),
     durationSeconds: z.number().optional().default(5).describe('How long to record (default 5 seconds)'),
-    width: z.number().optional().default(1280).describe('Viewport width'),
-    height: z.number().optional().default(720).describe('Viewport height'),
-    gifFps: z.number().optional().default(10).describe('GIF frame rate'),
-    gifWidth: z.number().optional().default(640).describe('GIF width (height auto-scaled)')
+    width: z.number().optional().describe('Viewport width (auto-set if platform specified)'),
+    height: z.number().optional().describe('Viewport height (auto-set if platform specified)'),
+    outputFormat: z.enum(['gif', 'mp4']).optional().describe('Output format (auto-set if platform specified)'),
+    gifFps: z.number().optional().default(10).describe('GIF frame rate (only for GIF output)'),
+    gifWidth: z.number().optional().default(640).describe('GIF width (only for GIF output, height auto-scaled)')
   },
-  async ({ url, durationSeconds, width, height, gifFps, gifWidth }) => {
+  async ({ url, platform, durationSeconds, width, height, outputFormat, gifFps, gifWidth }) => {
     try {
-      const rec = await startRecording(url, { width, height });
+      const resolved = resolvePlatform(platform, width, height);
+      const format = outputFormat || resolved.format || 'gif';
+      const rec = await startRecording(url, { width: resolved.width, height: resolved.height });
       await new Promise(r => setTimeout(r, durationSeconds * 1000));
       const stop = await stopRecording(rec.sessionId);
-      const gif = await convertToGif(stop.webmPath, { fps: gifFps, width: gifWidth });
-      return {
-        content: [{
-          type: 'text',
-          text: `Recording complete!\n\nVideo: ${stop.webmPath} (${stop.durationSeconds}s)\nGIF: ${gif.gifPath} (${gif.sizeMB} MB)\n\nReady to use in README or documentation.`
-        }]
-      };
+
+      if (format === 'mp4') {
+        const mp4 = await convertToMp4(stop.webmPath);
+        return {
+          content: [{
+            type: 'text',
+            text: `Recording complete!${resolved.label ? ` (${resolved.label})` : ''}\n\nVideo: ${stop.webmPath} (${stop.durationSeconds}s)\nMP4: ${mp4.mp4Path} (${mp4.sizeMB} MB)\n\nReady to upload to ${platform || 'your platform'}.`
+          }]
+        };
+      } else {
+        const gif = await convertToGif(stop.webmPath, { fps: gifFps, width: gifWidth });
+        return {
+          content: [{
+            type: 'text',
+            text: `Recording complete!${resolved.label ? ` (${resolved.label})` : ''}\n\nVideo: ${stop.webmPath} (${stop.durationSeconds}s)\nGIF: ${gif.gifPath} (${gif.sizeMB} MB)\n\nReady to use in README or documentation.`
+          }]
+        };
+      }
     } catch (err) {
       return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
     }

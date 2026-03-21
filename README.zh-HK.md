@@ -9,7 +9,7 @@
 
 **將 AI 操作 browser 嘅過程變成你真正交付得到嘅 GIF 同影片。**
 
-叫你嘅 AI 錄低佢做緊嘅嘢。佢開個 browser，做完件事，然後畀返個 GIF、WebM 或者 MP4 你。你可以實時睇住佢做。
+叫你嘅 AI 錄低佢做緊嘅嘢。佢開個 browser，做完件事，然後畀返個 GIF、WebM 或者 MP4 你。
 
 ### 下面呢個 demo 係 Pagecast 自己錄自己嘅。係真㗎。
 
