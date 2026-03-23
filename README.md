@@ -1,6 +1,7 @@
 # Pagecast
 
 [![npm version](https://img.shields.io/npm/v/@mcpware/pagecast)](https://www.npmjs.com/package/@mcpware/pagecast)
+[![npm downloads](https://img.shields.io/npm/dt/@mcpware/pagecast?label=downloads)](https://www.npmjs.com/package/@mcpware/pagecast)
 [![license](https://img.shields.io/github/license/mcpware/pagecast)](LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/mcpware/pagecast?style=social)](https://github.com/mcpware/pagecast)
 [![GitHub forks](https://img.shields.io/github/forks/mcpware/pagecast?style=social)](https://github.com/mcpware/pagecast/fork)
