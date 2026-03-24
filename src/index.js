@@ -2,8 +2,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { startRecording, stopRecording, interactWithPage, listSessions, cleanup, setHeadless } from './recorder.js';
-import { convertToGif, convertToMp4, listRecordings } from './converter.js';
+import { startRecording, stopRecording, interactWithPage, injectDemoOverlay, listSessions, cleanup, setHeadless } from './recorder.js';
+import { convertToGif, convertToMp4, convertWithZoomGif, convertWithZoomMp4, convertWithTooltipGif, convertWithTooltipMp4, listRecordings } from './converter.js';
+import { isRemotionAvailable, renderCinematic } from './remotion/render.js';
 
 // CLI flags: --headless to run browser without visible window (default: headed)
 if (process.argv.includes('--headless')) {
@@ -81,7 +82,7 @@ mcp.tool(
   {
     sessionId: z.string().describe('Session ID from record_page'),
     actions: z.array(z.object({
-      type: z.enum(['wait', 'scroll', 'click', 'hover', 'type', 'press', 'select', 'navigate']).describe('Action type'),
+      type: z.enum(['wait', 'scroll', 'click', 'hover', 'type', 'press', 'select', 'navigate', 'waitForSelector']).describe('Action type'),
       ms: z.number().optional().describe('Wait duration in ms (for wait action)'),
       x: z.number().optional().describe('Scroll X pixels (for scroll) or hover X coordinate (for hover)'),
       y: z.number().optional().describe('Scroll Y pixels (for scroll) or hover Y coordinate (for hover)'),
@@ -247,6 +248,145 @@ mcp.tool(
       }
       const list = recordings.map(r => `${r.name} (${r.type}, ${r.sizeMB} MB, ${r.createdAt})`).join('\n');
       return { content: [{ type: 'text', text: `Recordings in ${dir}:\n\n${list}` }] };
+    } catch (err) {
+      return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+// Tool 8: Cinematic export with crop-pan zoom
+mcp.tool(
+  'cinematic_export',
+  `Convert a recorded .webm to GIF or MP4 with cinematic crop-pan effects.
+
+Crops the entire frame to focus on the interaction area, then pans smoothly between targets.
+Think of it as a virtual cameraman that follows the action.
+
+Two rendering modes:
+- "quick" (default): FFmpeg-based crop with smoothstep easing. Fast, no extra dependencies.
+- "cinematic": Remotion-based rendering with spring animations. Requires remotion + react installed.
+
+Example workflow:
+1. record_page → interact_page (clicks, typing, etc.) → stop_recording
+2. cinematic_export with the webmPath and timelinePath from stop_recording
+3. Get a polished GIF/MP4 where the camera follows the action`,
+  {
+    webmPath: z.string().describe('Path to the .webm file from stop_recording'),
+    timelinePath: z.string().describe('Path to the -timeline.json file from stop_recording'),
+    format: z.enum(['gif', 'mp4']).optional().default('gif').describe('Output format (default: gif)'),
+    mode: z.enum(['quick', 'cinematic']).optional().default('quick').describe('Rendering mode: "quick" (FFmpeg) or "cinematic" (Remotion)'),
+    zoomLevel: z.number().optional().default(2.5).describe('Zoom multiplier (default 2.5 = 2.5x zoom into interaction area)'),
+    transitionDuration: z.number().optional().default(0.35).describe('Zoom ease-in/out duration in seconds'),
+    holdPerTarget: z.number().optional().default(0.8).describe('How long to hold zoom on each interaction (seconds)'),
+    fps: z.number().optional().describe('Frame rate (default: 12 for GIF, 30 for cinematic MP4)'),
+    width: z.number().optional().default(800).describe('Output width for GIF (height auto-scaled)'),
+  },
+  async ({ webmPath, timelinePath, format, mode, zoomLevel, transitionDuration, holdPerTarget, fps, width }) => {
+    try {
+      let result;
+      const zoomOpts = { zoomLevel, transitionDuration, holdPerTarget };
+
+      if (mode === 'cinematic') {
+        // Remotion pipeline — smooth spring animations
+        const remotionReady = await isRemotionAvailable();
+        if (!remotionReady) {
+          return {
+            content: [{
+              type: 'text',
+              text: 'Remotion not installed. Install with:\n  npm i -D remotion @remotion/cli @remotion/media-utils react react-dom\n\nOr use mode="quick" for FFmpeg-based zoom (no extra deps needed).'
+            }],
+            isError: true
+          };
+        }
+        result = await renderCinematic(webmPath, timelinePath, {
+          format, ...zoomOpts, fps,
+        });
+        const ext = format === 'gif' ? 'GIF' : 'MP4';
+        return {
+          content: [{
+            type: 'text',
+            text: `Cinematic ${ext} created with Remotion!\n\nFile: ${result.outputPath}\nSize: ${result.sizeMB} MB\nZoom events: ${result.zoomEvents} interactions auto-zoomed\nRenderer: Remotion (spring animations)\n\nPro tip: Adjust zoomLevel (1.5-3.0) and transitionDuration (0.2-0.6) to fine-tune the look.`
+          }]
+        };
+      } else {
+        // FFmpeg pipeline — fast crop-based zoom
+        if (format === 'gif') {
+          result = await convertWithZoomGif(webmPath, timelinePath, {
+            ...zoomOpts, fps: fps || 12, width,
+          });
+          return {
+            content: [{
+              type: 'text',
+              text: `Zoom GIF created!\n\nFile: ${result.gifPath}\nSize: ${result.sizeMB} MB\nZoom events: ${result.zoomEvents} interactions auto-zoomed\nRenderer: FFmpeg (smoothstep easing)\n\nWant smoother animations? Try mode="cinematic" (requires Remotion).`
+            }]
+          };
+        } else {
+          result = await convertWithZoomMp4(webmPath, timelinePath, zoomOpts);
+          return {
+            content: [{
+              type: 'text',
+              text: `Zoom MP4 created!\n\nFile: ${result.mp4Path}\nSize: ${result.sizeMB} MB\nZoom events: ${result.zoomEvents} interactions auto-zoomed\nRenderer: FFmpeg (smoothstep easing)\n\nWant smoother animations? Try mode="cinematic" (requires Remotion).`
+            }]
+          };
+        }
+      }
+    } catch (err) {
+      return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
+    }
+  }
+);
+
+// Tool 9: Smart export with tooltip overlay
+mcp.tool(
+  'smart_export',
+  `Convert a recorded .webm to GIF or MP4 with tooltip overlays on interactions.
+
+The full viewport stays visible. When an interaction happens (click, type, hover),
+a clean tooltip inset appears showing a magnified close-up of that area with a small
+arrow pointing toward the interaction. Modern, minimal design (Linear/Figma style).
+
+The tooltip positions itself on the opposite side of the screen from the interaction.
+
+Perfect for product demos where viewers need to see both the full UI context AND the detail.
+
+Example workflow:
+1. record_page → interact_page (clicks, typing, etc.) → stop_recording
+2. smart_export with the webmPath and timelinePath from stop_recording
+3. Get a polished GIF/MP4 with tooltip overlays on every interaction
+
+Compare with cinematic_export which crops the entire frame to follow the action.`,
+  {
+    webmPath: z.string().describe('Path to the .webm file from stop_recording'),
+    timelinePath: z.string().describe('Path to the -timeline.json file from stop_recording'),
+    format: z.enum(['gif', 'mp4']).optional().default('gif').describe('Output format (default: gif)'),
+    magnifyScale: z.number().optional().default(1.6).describe('How much to magnify inside the tooltip (default 1.6x)'),
+    tooltipSize: z.number().optional().default(380).describe('Size of the tooltip inset in pixels (default 380)'),
+    holdPerTarget: z.number().optional().default(1.2).describe('How long to show each tooltip (seconds)'),
+    fps: z.number().optional().default(12).describe('Frame rate for GIF output'),
+    width: z.number().optional().default(800).describe('Output width for GIF (height auto-scaled)'),
+  },
+  async ({ webmPath, timelinePath, format, magnifyScale, tooltipSize, holdPerTarget, fps, width }) => {
+    try {
+      const opts = { magnifyScale, tooltipSize, holdPerTarget };
+      let result;
+
+      if (format === 'gif') {
+        result = await convertWithTooltipGif(webmPath, timelinePath, { ...opts, fps, width });
+        return {
+          content: [{
+            type: 'text',
+            text: `Tooltip GIF created!\n\nFile: ${result.gifPath}\nSize: ${result.sizeMB} MB\nTooltip events: ${result.tooltipEvents} interactions with tooltip overlay\n\nFull viewport visible + tooltip close-ups on each interaction.`
+          }]
+        };
+      } else {
+        result = await convertWithTooltipMp4(webmPath, timelinePath, opts);
+        return {
+          content: [{
+            type: 'text',
+            text: `Tooltip MP4 created!\n\nFile: ${result.mp4Path}\nSize: ${result.sizeMB} MB\nTooltip events: ${result.tooltipEvents} interactions with tooltip overlay\n\nFull viewport visible + tooltip close-ups on each interaction.`
+          }]
+        };
+      }
     } catch (err) {
       return { content: [{ type: 'text', text: `Error: ${err.message}` }], isError: true };
     }

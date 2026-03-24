@@ -1,7 +1,7 @@
 {
   "name": "@mcpware/pagecast",
-  "version": "0.2.1",
-  "description": "Record any browser page as GIF or video via MCP — powered by Playwright + ffmpeg",
+  "version": "0.3.0",
+  "description": "Record any browser page as GIF or video via MCP — with auto-zoom on interactions. Powered by Playwright + ffmpeg + Remotion.",
   "type": "module",
   "bin": {
     "pagecast": "./src/index.js"
@@ -29,7 +29,10 @@
     "automation",
     "documentation",
     "claude",
-    "model-context-protocol"
+    "model-context-protocol",
+    "auto-zoom",
+    "demo-recording",
+    "remotion"
   ],
   "mcpName": "io.github.mcpware/pagecast",
   "author": "mcpware",
@@ -42,6 +45,13 @@
     "@modelcontextprotocol/sdk": "^1.27.1",
     "playwright": "^1.52.0",
     "zod": "^3.23.0"
+  },
+  "optionalDependencies": {
+    "remotion": "^4.0.0",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/media-utils": "^4.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "engines": {
     "node": ">=20.0.0"
