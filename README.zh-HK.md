@@ -15,13 +15,17 @@ AI click、打字、scroll — Pagecast 追蹤佢互動嘅位置然後自動 zoo
 
 ![Moltbook Demo](docs/moltbook-demo.gif)
 
-### 兩個 export 模式
+### 三個 export 模式
 
-**Tooltip overlay** — 成個畫面照播，互動位置彈出放大 tooltip：
+**冇 Pagecast** — 淨係錄 screen。個 cursor 喺度郁但你根本睇唔到佢撳緊啲咩：
+
+![Original](docs/demo-original.gif)
+
+**用 Pagecast（tooltip 模式）** — 每個互動位置彈出放大 tooltip，終於睇到做緊啲咩：
 
 ![Tooltip Demo](docs/demo-tooltip.gif)
 
-**Cinematic crop-pan** — camera 跟住 action，zoom 入去每個互動區域：
+**用 Pagecast（cinematic 模式）** — camera 跟住 action crop + pan：
 
 ![Cinematic Demo](docs/demo-cinematic.gif)
 
