@@ -12,7 +12,7 @@
 
 Tell your AI to demo your app. Pagecast records the browser, tracks every click and keystroke, and exports a shipping-ready GIF or MP4 — with tooltip zoom overlays and cinematic pan effects. No screen recorder. No video editor. No post-production.
 
-### Without Pagecast — plain screen recording. You can see the cursor moving, but the actual interactions are too small to follow:
+### Without Pagecast — plain screen recording, you do the demonstration yourself and record yourself. You can see the cursor moving, but the actual interactions are too small to follow:
 
 ![Original](docs/demo-original.gif)
 
