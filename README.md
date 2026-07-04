@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/mcpware-pagecast-badge.png)](https://mseep.ai/app/mcpware-pagecast)
+
 # Pagecast
 
 [![npm version](https://img.shields.io/npm/v/@mcpware/pagecast)](https://www.npmjs.com/package/@mcpware/pagecast)
